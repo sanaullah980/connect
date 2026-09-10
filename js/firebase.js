@@ -51,7 +51,7 @@ window.FB = {
   async assignRole(uid,role){ await this.db.collection('users').doc(uid).update({roles:firebase.firestore.FieldValue.arrayUnion(role)}); await this.db.collection('roleAudit').add({targetUid:uid,role,action:'assigned',by:CC.user.uid,createdAt:this.serverTime()}); },
   async removeRole(uid,role){ await this.db.collection('users').doc(uid).update({roles:firebase.firestore.FieldValue.arrayRemove(role)}); await this.db.collection('roleAudit').add({targetUid:uid,role,action:'removed',by:CC.user.uid,createdAt:this.serverTime()}); },
   listenNotices(cb){ return this.db.collection('notices').orderBy('createdAt','desc').onSnapshot(s=>cb(s.docs.map(d=>({ ...d.data(), id:d.id })))); },
-  async addNotice(n){ await this.db.collection('notices').add({ ...n, authorUid:CC.user.uid, authorName:CC.user.name, createdAt:this.serverTime() }); },
+  async addNotice(n){ if(!this.enabled) throw new Error('Firebase is not enabled.'); if(!CC.user||!CC.user.uid) throw new Error('You must be signed in to publish a notice.'); await this.db.collection('notices').add({ title:String(n.title||'').trim(), body:String(n.body||'').trim(), priority:n.priority||'Normal', authorUid:CC.user.uid, authorName:CC.user.name||'Connect Campus User', createdAt:this.serverTime() }); },
   listenMessages(groupId,cb){ return this.db.collection('groups').doc(groupId).collection('messages').orderBy('createdAt','asc').onSnapshot(s=>cb(s.docs.map(d=>({ ...d.data(), id:d.id })))); },
   async sendMessage(groupId,text){ await this.db.collection('groups').doc(groupId).collection('messages').add({text,uid:CC.user.uid,name:CC.user.name,createdAt:this.serverTime()}); }
 };
