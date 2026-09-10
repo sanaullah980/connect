@@ -10,5 +10,10 @@ function render(){
 }
 window.render=render;
 window.navigate=function(p){state.page=p; render(); window.scrollTo({top:0,behavior:'smooth'});};
+// Every page module updates `state` then does document.dispatchEvent(new Event('render'))
+// to ask for a re-render (e.g. after sending a group message, toggling dark mode, marking
+// an item resolved). Nothing was listening for that event, so those actions silently did
+// nothing on screen even though the underlying state had changed.
+document.addEventListener('render',render);
 render();
 })();
