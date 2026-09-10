@@ -1,5 +1,1 @@
-function toast(t){const e=document.createElement('div');e.className='toast';e.textContent=t;document.body.append(e);setTimeout(()=>e.remove(),2600)}
-function modal(title,body,onOpen){const b=document.createElement('div');b.className='modal-backdrop';b.innerHTML=`<div class="modal"><div class="section-title"><h2>${title}</h2><button class="icon-btn" data-close>✕</button></div>${body}</div>`;b.addEventListener('click',e=>{if(e.target===b||e.target.dataset.close!==undefined)b.remove()});document.body.append(b);onOpen?.(b)}
-const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-
-window.toast=toast; window.modal=modal; window.esc=esc;
+window.UI={toast(m){let e=document.createElement('div');e.className='toast';e.textContent=m;document.getElementById('toastRoot').append(e);setTimeout(()=>e.remove(),2600)},modal(title,html){document.getElementById('modalRoot').innerHTML=`<div class="modal-bg" onclick="if(event.target===this)UI.close()"><div class="modal"><div class="row"><h2>${title}</h2><button class="btn secondary" onclick="UI.close()">Close</button></div>${html}</div></div>`},close(){document.getElementById('modalRoot').innerHTML=''},empty(t){return `<div class="empty">${t}</div>`},esc(s){return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}};
