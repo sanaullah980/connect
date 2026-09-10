@@ -1,5 +1,5 @@
 window.Roles={
-  isOwner(){return !!CC.user && (CC.user.roles||[]).includes('owner_admin')},
+  isOwner(){return !!CC.user && (CC.user.isOwner===true || (CC.user.roles||[]).includes('owner_admin'))},
   async render(){
     if(!this.isOwner()) return `<section class="page"><h1>Owner Admin only</h1><p class="small">This area is only available to the configured Google owner account.</p></section>`;
     let users=[];try{users=FB.enabled?await FB.users():(CC.data.users||[CC.user])}catch(e){return `<section class="page"><h1>Owner Admin</h1><div class="card"><b>Permission error</b><p class="small">Publish the included Firestore rules and refresh.</p></div></section>`}
@@ -9,6 +9,6 @@ window.Roles={
   table(users){return users.map(u=>`<tr><td>${u.name||'—'}</td><td>@${u.username||'—'}</td><td>${u.provider||'—'}</td><td>${(u.roles||['student']).join(', ')}</td><td>${u.createdAt&&u.createdAt.toDate?u.createdAt.toDate().toLocaleDateString():'—'}</td></tr>`).join('')||'<tr><td colspan="5" class="small">No users found.</td></tr>'},
   async filter(q){let users=FB.enabled?await FB.users():(CC.data.users||[CC.user]);q=q.toLowerCase();document.getElementById('userList').innerHTML=this.list(users.filter(u=>`${u.name||''} ${u.username||''}`.toLowerCase().includes(q)))},
   openAssign(uid,name,username){let roles=['student','teacher','cr','announcement_publisher','timetable_manager','moderator','institution_admin'];UI.modal('Assign role',`<p><b>${name||'User'}</b><br><span class="small">@${username||'—'}</span></p><div class="field"><label>Role</label><select id="roleSelect">${roles.map(r=>`<option value="${r}">${r.replaceAll('_',' ')}</option>`).join('')}</select></div><button class="btn" onclick="Roles.assign('${uid}')">Assign role</button><div class="field" style="margin-top:16px"><label>Remove role</label><select id="removeRole">${roles.map(r=>`<option value="${r}">${r.replaceAll('_',' ')}</option>`).join('')}</select></div><button class="btn danger" onclick="Roles.remove('${uid}')">Remove selected role</button>`)},
-  async assign(uid){try{let r=document.getElementById('roleSelect').value;if(FB.enabled)await FB.assignRole(uid,r);UI.close();UI.toast('Role assigned')}catch(e){UI.toast(e.message)}},
-  async remove(uid){try{let r=document.getElementById('removeRole').value;if(FB.enabled)await FB.removeRole(uid,r);UI.close();UI.toast('Role removed')}catch(e){UI.toast(e.message)}}
+  async assign(uid){try{let r=document.getElementById('roleSelect').value;if(FB.enabled)await FB.assignRole(uid,r);UI.close();UI.toast('Role assigned');App.render()}catch(e){UI.toast(e.message)}},
+  async remove(uid){try{let r=document.getElementById('removeRole').value;if(FB.enabled)await FB.removeRole(uid,r);UI.close();UI.toast('Role removed');App.render()}catch(e){UI.toast(e.message)}}
 };

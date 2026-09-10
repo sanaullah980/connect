@@ -9,6 +9,7 @@ window.FB = {
   serverTime(){ return firebase.firestore.FieldValue.serverTimestamp(); },
   ownerEmail(){ return (window.CC_OWNER_GOOGLE_EMAIL||'').toLowerCase(); },
   isOwnerAuth(user){ return !!user && user.email && user.email.toLowerCase()===this.ownerEmail() && (user.providerData||[]).some(p=>p.providerId==='google.com'); },
+  isOwnerCurrent(){ return this.isOwnerAuth(this.auth && this.auth.currentUser); },
   async usernameAvailable(username){
     username=(username||'').trim().toLowerCase();
     if(!username) return false;
@@ -46,7 +47,7 @@ window.FB = {
     }
     return (await ref.get()).data();
   },
-  async users(){ const s=await this.db.collection('users').orderBy('createdAt','desc').limit(300).get(); return s.docs.map(d=>d.data()); },
+  async users(){ const s=await this.db.collection('users').limit(300).get(); return s.docs.map(d=>d.data()).sort((a,b)=>String(b.name||'').localeCompare(String(a.name||''))); },
   async assignRole(uid,role){ await this.db.collection('users').doc(uid).update({roles:firebase.firestore.FieldValue.arrayUnion(role)}); await this.db.collection('roleAudit').add({targetUid:uid,role,action:'assigned',by:CC.user.uid,createdAt:this.serverTime()}); },
   async removeRole(uid,role){ await this.db.collection('users').doc(uid).update({roles:firebase.firestore.FieldValue.arrayRemove(role)}); await this.db.collection('roleAudit').add({targetUid:uid,role,action:'removed',by:CC.user.uid,createdAt:this.serverTime()}); },
   listenNotices(cb){ return this.db.collection('notices').orderBy('createdAt','desc').onSnapshot(s=>cb(s.docs.map(d=>({ ...d.data(), id:d.id })))); },

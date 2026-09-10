@@ -4,11 +4,11 @@ window.Auth={
     if(FB.enabled){
       FB.auth.onAuthStateChanged(async u=>{
         if(!u){this.welcome();return}
-        CC.user={uid:u.uid,name:u.displayName||'',email:u.email||''};
+        CC.user={uid:u.uid,name:u.displayName||'',email:u.email||'',isOwner:FB.isOwnerAuth(u)};
         try{
           const snap=await FB.db.collection('users').doc(u.uid).get();
           if(!snap.exists || !snap.data().username){ this.onboarding({name:u.displayName||'',username:'',email:u.email||'',uid:u.uid}); return; }
-          CC.user={...CC.user,...await FB.ensureUser(u,snap.data())}; App.start();
+          CC.user={...CC.user,...await FB.ensureUser(u,snap.data()),isOwner:FB.isOwnerAuth(u)}; App.start();
         }catch(err){UI.toast(err.message);this.welcome()}
       });
     }else{let u=localStorage.getItem('cc_user');if(u){CC.user=JSON.parse(u);App.start()}else this.welcome()}
@@ -22,7 +22,7 @@ window.Auth={
   forgot(){UI.modal('Reset password',`<div class="field"><label>Account email</label><input id="resetEmail" type="email"></div><button class="btn" onclick="Auth.reset()">Send reset link</button>`)},
   async reset(){try{if(FB.enabled)await FB.auth.sendPasswordResetEmail(resetEmail.value);UI.close();UI.toast('Password reset request sent')}catch(e){UI.toast(e.message)}},
   onboarding(u){authRoot.innerHTML=`<main class="auth"><section class="auth-card"><div class="auth-hero"><div class="brand">● CONNECT CAMPUS</div><h1>Set up your academic profile.</h1></div><form class="auth-form" onsubmit="Auth.finishProfile(event)"><div class="field"><label>Unique username</label><input id="onUsername" value="${u.username||''}" pattern="[A-Za-z0-9._-]{3,24}" required></div><div class="field"><label>Institution</label><input id="inst" required value="${CC.data.profile.institution||''}"></div><div class="field"><label>Department</label><input id="dept" required value="${CC.data.profile.department||''}"></div><div class="field"><label>Semester</label><input id="sem" required value="${CC.data.profile.semester||''}"></div><input id="onName" type="hidden" value="${u.name||''}"><button class="btn">Enter Connect Campus</button></form></section></main>`},
-  async finishProfile(e){e.preventDefault();try{CC.data.profile={institution:inst.value,department:dept.value,semester:sem.value,username:onUsername.value.trim().toLowerCase()};CC.save();if(FB.enabled)await FB.ensureUser(FB.auth.currentUser,{...CC.data.profile,name:onName.value,username:onUsername.value});this.finish({uid:FB.enabled?FB.auth.currentUser.uid:'local-'+Date.now(),name:onName.value,username:onUsername.value,roles:['student']})}catch(err){UI.toast(err.message)}},
+  async finishProfile(e){e.preventDefault();try{CC.data.profile={institution:inst.value,department:dept.value,semester:sem.value,username:onUsername.value.trim().toLowerCase()};CC.save();if(FB.enabled)await FB.ensureUser(FB.auth.currentUser,{...CC.data.profile,name:onName.value,username:onUsername.value});this.finish({uid:FB.enabled?FB.auth.currentUser.uid:'local-'+Date.now(),name:onName.value,username:onUsername.value,roles:FB.enabled&&FB.isOwnerCurrent()?['owner_admin']:['student'],isOwner:FB.enabled&&FB.isOwnerCurrent()})}catch(err){UI.toast(err.message)}},
   finish(u){CC.user={...u,roles:u.roles||['student']};if(!FB.enabled)localStorage.setItem('cc_user',JSON.stringify(CC.user));App.start()},
   async logout(){if(FB.enabled)await FB.auth.signOut();else localStorage.removeItem('cc_user');CC.user=null;appRoot.classList.add('hidden');authRoot.classList.remove('hidden');this.welcome()}
 };
