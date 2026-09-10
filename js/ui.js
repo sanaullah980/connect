@@ -1,0 +1,3 @@
+export function toast(t){const e=document.createElement('div');e.className='toast';e.textContent=t;document.body.append(e);setTimeout(()=>e.remove(),2600)}
+export function modal(title,body,onOpen){const b=document.createElement('div');b.className='modal-backdrop';b.innerHTML=`<div class="modal"><div class="section-title"><h2>${title}</h2><button class="icon-btn" data-close>✕</button></div>${body}</div>`;b.addEventListener('click',e=>{if(e.target===b||e.target.dataset.close!==undefined)b.remove()});document.body.append(b);onOpen?.(b)}
+export const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));

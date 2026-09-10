@@ -1,0 +1,15 @@
+rules_version = '2';
+service cloud.firestore {
+ match /databases/{database}/documents {
+  function signedIn(){ return request.auth != null; }
+  function member(i){ return signedIn() && exists(/databases/$(database)/documents/institutions/$(i)/members/$(request.auth.uid)); }
+  function admin(i){ return member(i) && get(/databases/$(database)/documents/institutions/$(i)/members/$(request.auth.uid)).data.role in ['institutionAdmin','announcementPublisher','timetableManager','moderator']; }
+  match /institutions/{i} {
+   allow read: if signedIn(); allow create: if signedIn(); allow update,delete: if admin(i);
+   match /members/{uid} { allow read: if member(i); allow create,update: if request.auth.uid==uid || admin(i); allow delete: if admin(i); }
+   match /{c}/{id} { allow read: if member(i); allow create: if member(i); allow update,delete: if admin(i) || (signedIn() && resource.data.authorId==request.auth.uid); }
+   match /groups/{g}/messages/{m} { allow read,create: if member(i); allow update,delete: if admin(i) || resource.data.authorId==request.auth.uid; }
+  }
+  match /users/{uid} { allow read,write: if signedIn() && request.auth.uid==uid; }
+ }
+}
