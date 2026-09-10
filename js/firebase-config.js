@@ -1,5 +1,6 @@
-/* Paste your Firebase Web App config here. The first administrator emails are bootstrapped below. */
+/* Paste your Firebase Web App config here before deployment. */
 window.CC_FIREBASE_CONFIG = {
   apiKey: "", authDomain: "", projectId: "", storageBucket: "", messagingSenderId: "", appId: ""
 };
-window.CC_BOOTSTRAP_ADMIN_EMAILS = ["YOUR_ADMIN_EMAIL@example.com"];
+/* The only account that can open Owner Admin / Assign Roles / Database. */
+window.CC_OWNER_GOOGLE_EMAIL = "sanaullahmawia980@gmail.com";
