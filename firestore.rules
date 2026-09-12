@@ -1,149 +1,156 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    function signedIn() { return request.auth != null; }
-
-    // Main Owner: based directly on the authenticated Firebase account.
-    function isOwner() {
-      return signedIn()
-        && request.auth.token.email != null
-        && request.auth.token.email == 'sanaullahmawia980@gmail.com';
+    
+    // Default deny all
+    match /{document=**} {
+      allow read, write: if false;
     }
 
-    function userExists() {
-      return signedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid));
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
     }
 
-    function myUser() {
+    function isOwnerEmail() {
+      return isSignedIn() && request.auth.token.email == "sanaullahmawia980@gmail.com";
+    }
+
+    function isUser(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    function getUserData() {
       return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
     }
 
-    function hasRole(role) {
-      return isOwner() || (userExists() && role in myUser().roles);
+    function hasAnyRole(rolesList) {
+      return isOwnerEmail() || (
+        isSignedIn() && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        getUserData().roles.hasAny(rolesList)
+      );
     }
 
-    function isAdmin() {
-      return hasRole('institution_admin');
+    function isStaffOrAdmin() {
+      return isOwnerEmail() || hasAnyRole(['Institution Admin', 'Moderator', 'Teacher']);
     }
 
-    function canPublishNotices() {
-      return isOwner()
-        || hasRole('institution_admin')
-        || hasRole('announcement_publisher');
+    // Connection test document (for getFromServer validation)
+    match /test/{docId} {
+      allow read, write: if isSignedIn();
     }
 
-    function canManageTimetable() {
-      return isOwner()
-        || hasRole('institution_admin')
-        || hasRole('timetable_manager');
-    }
-
-    function canModerate() {
-      return isOwner()
-        || hasRole('institution_admin')
-        || hasRole('moderator');
-    }
-
-    // Unique username index
+    // Username mapping
     match /usernames/{username} {
-      allow get: if true;
-      allow list: if false;
-      allow create: if signedIn()
-        && request.resource.data.uid == request.auth.uid
-        && request.resource.data.username == username;
-      allow update, delete: if false;
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.uid == request.auth.uid;
+      allow update, delete: if isOwnerEmail();
     }
 
-    // User profiles and role storage
-    match /users/{uid} {
-      allow create: if signedIn() && request.auth.uid == uid;
-      allow get: if signedIn();
-      allow list: if isOwner() || isAdmin();
+    // User profiles
+    match /users/{userId} {
+      // Any signed in user can read user profiles
+      allow read: if isSignedIn();
+      
+      // Creating initial profile upon signup
+      allow create: if isSignedIn() && request.auth.uid == userId && (
+        isOwnerEmail() || 
+        (request.resource.data.roles.hasOnly(['Student']) || request.resource.data.roles.size() == 0)
+      );
+      
+      // Update profile:
+      // Owner can update roles and info
+      // Regular user can only update their own non-role profile fields (name, department, semester, etc.)
+      allow update: if isSignedIn() && (
+        isOwnerEmail() || (
+          request.auth.uid == userId && 
+          !request.resource.data.diff(resource.data).affectedKeys().hasAny(['roles', 'email', 'loginProvider', 'uid'])
+        )
+      );
 
-      // Owner/admin can manage roles. A user may edit their own profile but never roles.
-      allow update: if isOwner()
-        || isAdmin()
-        || (signedIn()
-          && request.auth.uid == uid
-          && request.resource.data.roles == resource.data.roles
-          && request.resource.data.uid == resource.data.uid);
-
-      allow delete: if isOwner();
+      // Deletion: Only owner, but owner account can NEVER be deleted
+      allow delete: if isOwnerEmail() && resource.data.email != "sanaullahmawia980@gmail.com";
     }
 
-    // Shared official notices used by js/notices.js and js/firebase.js
+    // Notices & Announcements
     match /notices/{noticeId} {
-      allow read: if signedIn();
-
-      allow create: if canPublishNotices()
-        && request.resource.data.authorUid == request.auth.uid;
-
-      allow update: if isOwner()
-        || isAdmin()
-        || (signedIn() && resource.data.authorUid == request.auth.uid);
-
-      allow delete: if isOwner()
-        || isAdmin()
-        || (signedIn() && resource.data.authorUid == request.auth.uid);
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && (
+        isOwnerEmail() || 
+        hasAnyRole(['Institution Admin', 'Announcement Publisher', 'Teacher', 'CR'])
+      ) && request.resource.data.authorUid == request.auth.uid;
+      
+      allow update, delete: if isSignedIn() && (
+        isOwnerEmail() || 
+        resource.data.authorUid == request.auth.uid ||
+        hasAnyRole(['Institution Admin'])
+      );
     }
 
-    // Timetable documents
-    match /timetables/{id} {
-      allow read: if signedIn();
-      allow create, update: if canManageTimetable();
-      allow delete: if isOwner() || isAdmin();
+    // Timetable
+    match /timetable/{classId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isSignedIn() && (
+        isOwnerEmail() || 
+        hasAnyRole(['Institution Admin', 'Timetable Manager'])
+      );
     }
 
-    // Materials
-    match /materials/{id} {
-      allow read: if signedIn();
-      allow create: if signedIn();
-      allow update, delete: if isOwner() || isAdmin()
-        || (signedIn() && resource.data.ownerId == request.auth.uid);
+    // Academic Materials
+    match /materials/{materialId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.uploaderUid == request.auth.uid;
+      allow update, delete: if isSignedIn() && (
+        isOwnerEmail() || 
+        resource.data.uploaderUid == request.auth.uid ||
+        hasAnyRole(['Institution Admin', 'Moderator'])
+      );
     }
 
-    // Groups and real-time messages
+    // Subject Groups
     match /groups/{groupId} {
-      allow read: if signedIn();
-      allow create: if signedIn();
-      allow update, delete: if isOwner() || isAdmin();
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update, delete: if isSignedIn() && (
+        isOwnerEmail() || 
+        resource.data.createdBy == request.auth.uid ||
+        hasAnyRole(['Institution Admin'])
+      );
 
+      // Group Chat Messages
       match /messages/{messageId} {
-        allow read: if signedIn();
-        allow create: if signedIn()
-          && request.resource.data.uid == request.auth.uid;
-        allow update, delete: if isOwner()
-          || canModerate()
-          || (signedIn() && resource.data.uid == request.auth.uid);
+        allow read: if isSignedIn();
+        allow create: if isSignedIn() && request.resource.data.senderUid == request.auth.uid;
+        allow update, delete: if isSignedIn() && (
+          isOwnerEmail() || 
+          resource.data.senderUid == request.auth.uid ||
+          hasAnyRole(['Institution Admin', 'Moderator'])
+        );
       }
     }
 
     // Lost and Found
-    match /lostFound/{id} {
-      allow read: if signedIn();
-      allow create: if signedIn()
-        && request.resource.data.ownerId == request.auth.uid;
-      allow update, delete: if canModerate()
-        || (signedIn() && resource.data.ownerId == request.auth.uid);
+    match /lost_found/{itemId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.posterUid == request.auth.uid;
+      allow update: if isSignedIn() && (
+        isOwnerEmail() || 
+        resource.data.posterUid == request.auth.uid ||
+        hasAnyRole(['Institution Admin', 'Moderator'])
+      );
+      allow delete: if isSignedIn() && (
+        isOwnerEmail() || 
+        resource.data.posterUid == request.auth.uid ||
+        hasAnyRole(['Institution Admin', 'Moderator'])
+      );
     }
 
-    // Per-user notifications
-    match /notifications/{id} {
-      allow read, update, delete: if signedIn()
-        && resource.data.userId == request.auth.uid;
-      allow create: if signedIn();
-    }
-
-    // Role audit written by owner/admin actions
-    match /roleAudit/{id} {
-      allow read: if isOwner() || isAdmin();
-      allow create: if isOwner() || isAdmin();
-      allow update, delete: if false;
-    }
-
-    match /{document=**} {
-      allow read, write: if false;
+    // Notifications
+    match /notifications/{notificationId} {
+      allow read: if isSignedIn() && resource.data.recipientUid == request.auth.uid;
+      allow create: if isSignedIn();
+      allow update, delete: if isSignedIn() && resource.data.recipientUid == request.auth.uid;
     }
   }
 }

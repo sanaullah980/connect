@@ -1,0 +1,8 @@
+{
+  "name": "Connect Campus",
+  "description": "A real-time, multi-user university platform connecting students, teachers, CRs, staff, admins, and the permanent owner in one shared campus ecosystem.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

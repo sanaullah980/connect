@@ -1,0 +1,187 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile and permissions",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "name": { "type": "string", "maxLength": 100 },
+        "username": { "type": "string", "maxLength": 30 },
+        "email": { "type": "string", "maxLength": 100 },
+        "loginProvider": { "type": "string", "enum": ["google", "password"] },
+        "roles": { "type": "array" },
+        "department": { "type": "string", "maxLength": 100 },
+        "program": { "type": "string", "maxLength": 100 },
+        "semester": { "type": "string", "maxLength": 50 },
+        "studentId": { "type": "string", "maxLength": 50 },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["uid", "name", "username", "loginProvider", "roles", "createdAt"]
+    },
+    "UsernameMapping": {
+      "title": "UsernameMapping",
+      "description": "Unique username registry",
+      "type": "object",
+      "properties": {
+        "username": { "type": "string", "maxLength": 30 },
+        "uid": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["username", "uid"]
+    },
+    "Notice": {
+      "title": "Notice",
+      "description": "Official announcements and campus notices",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string", "maxLength": 150 },
+        "description": { "type": "string", "maxLength": 2000 },
+        "category": { "type": "string", "maxLength": 50 },
+        "priority": { "type": "string", "enum": ["High", "Medium", "Normal"] },
+        "authorName": { "type": "string", "maxLength": 100 },
+        "authorUid": { "type": "string" },
+        "authorRole": { "type": "string", "maxLength": 50 },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["title", "description", "category", "priority", "authorName", "authorUid", "createdAt"]
+    },
+    "TimetableClass": {
+      "title": "TimetableClass",
+      "description": "Weekly course timetable item",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "subject": { "type": "string", "maxLength": 100 },
+        "day": { "type": "string", "maxLength": 20 },
+        "startTime": { "type": "string", "maxLength": 20 },
+        "endTime": { "type": "string", "maxLength": 20 },
+        "instructor": { "type": "string", "maxLength": 100 },
+        "room": { "type": "string", "maxLength": 50 },
+        "updatedBy": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["subject", "day", "startTime", "endTime", "instructor", "room"]
+    },
+    "Material": {
+      "title": "Material",
+      "description": "Academic resources and lecture notes",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string", "maxLength": 150 },
+        "subject": { "type": "string", "maxLength": 100 },
+        "description": { "type": "string", "maxLength": 1000 },
+        "fileName": { "type": "string", "maxLength": 150 },
+        "fileSize": { "type": "string", "maxLength": 50 },
+        "fileType": { "type": "string", "maxLength": 50 },
+        "uploaderName": { "type": "string", "maxLength": 100 },
+        "uploaderUid": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["title", "subject", "fileName", "uploaderName", "uploaderUid", "createdAt"]
+    },
+    "SubjectGroup": {
+      "title": "SubjectGroup",
+      "description": "Subject or class chat group",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string", "maxLength": 100 },
+        "code": { "type": "string", "maxLength": 30 },
+        "description": { "type": "string", "maxLength": 500 },
+        "createdBy": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["name", "code", "createdBy", "createdAt"]
+    },
+    "GroupMessage": {
+      "title": "GroupMessage",
+      "description": "Chat message within a subject group",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "groupId": { "type": "string" },
+        "senderUid": { "type": "string" },
+        "senderName": { "type": "string", "maxLength": 100 },
+        "senderRole": { "type": "string", "maxLength": 50 },
+        "text": { "type": "string", "maxLength": 2000 },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["groupId", "senderUid", "senderName", "text", "createdAt"]
+    },
+    "LostFoundItem": {
+      "title": "LostFoundItem",
+      "description": "Lost or found item listing",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "type": "string", "enum": ["lost", "found"] },
+        "title": { "type": "string", "maxLength": 150 },
+        "description": { "type": "string", "maxLength": 1000 },
+        "location": { "type": "string", "maxLength": 100 },
+        "posterName": { "type": "string", "maxLength": 100 },
+        "posterUid": { "type": "string" },
+        "status": { "type": "string", "enum": ["open", "claimed", "resolved"] },
+        "date": { "type": "string", "maxLength": 50 },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["type", "title", "description", "location", "posterName", "posterUid", "status", "createdAt"]
+    },
+    "Notification": {
+      "title": "Notification",
+      "description": "User notification",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "recipientUid": { "type": "string" },
+        "title": { "type": "string", "maxLength": 100 },
+        "message": { "type": "string", "maxLength": 300 },
+        "type": { "type": "string", "maxLength": 50 },
+        "link": { "type": "string", "maxLength": 100 },
+        "isRead": { "type": "boolean" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["recipientUid", "title", "message", "isRead", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles and assigned roles"
+    },
+    "/usernames/{username}": {
+      "schema": "UsernameMapping",
+      "description": "Unique username mappings to user IDs"
+    },
+    "/notices/{noticeId}": {
+      "schema": "Notice",
+      "description": "University notices and announcements"
+    },
+    "/timetable/{classId}": {
+      "schema": "TimetableClass",
+      "description": "Weekly course timetable records"
+    },
+    "/materials/{materialId}": {
+      "schema": "Material",
+      "description": "Uploaded academic materials metadata"
+    },
+    "/groups/{groupId}": {
+      "schema": "SubjectGroup",
+      "description": "Subject study and discussion groups"
+    },
+    "/groups/{groupId}/messages/{messageId}": {
+      "schema": "GroupMessage",
+      "description": "Real-time messages within subject groups"
+    },
+    "/lost_found/{itemId}": {
+      "schema": "LostFoundItem",
+      "description": "Lost and found item postings"
+    },
+    "/notifications/{notificationId}": {
+      "schema": "Notification",
+      "description": "User notifications"
+    }
+  }
+}
