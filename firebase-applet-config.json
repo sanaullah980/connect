@@ -1,12 +1,9 @@
 {
-  "projectId": "silent-hearth-5pthm",
-  "appId": "1:775112536553:web:cee21369e6a1f99ebb1b78",
-  "apiKey": "AIzaSyAVZerTGlkjb7NPXWOhSl040utgkxHxmpY",
-  "authDomain": "silent-hearth-5pthm.firebaseapp.com",
-  "firestoreDatabaseId": "ai-studio-f20f25fd-a891-4a2d-a213-fc71c43c7cc4",
-  "storageBucket": "silent-hearth-5pthm.firebasestorage.app",
-  "messagingSenderId": "775112536553",
-  "measurementId": "",
-  "oAuthClientId": "775112536553-i1spi4c0oeo83u74h4u9j9pmfaa4h9qu.apps.googleusercontent.com",
-  "recaptchaSiteKey": ""
+  "apiKey": "AIzaSyAeNS-BF2NQnRY-FoQ1FUzA8cGL7nRVgGM",
+  "authDomain": "pafiast-campus.firebaseapp.com",
+  "projectId": "pafiast-campus",
+  "storageBucket": "pafiast-campus.firebasestorage.app",
+  "messagingSenderId": "225899557462",
+  "appId": "1:225899557462:web:ae857dfbbf92a2844741f7",
+  "measurementId": "G-QFMLSV84HZ"
 }
