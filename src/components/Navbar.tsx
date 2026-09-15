@@ -16,9 +16,7 @@ import {
   Search,
   User as UserIcon,
   ShieldCheck,
-  Clock,
-  ShoppingBag,
-  Building2
+  Clock
 } from 'lucide-react';
 import { NavigationPage } from '../types';
 import { useAuth } from '../context/AuthContext';
@@ -61,8 +59,8 @@ export const Navbar: React.FC<NavbarProps> = ({
     switch (page) {
       case 'dashboard':
         return {
-          title: 'Connect PAF',
-          subtitle: 'PAF-IAST Campus • Live Academic Overview',
+          title: 'Campus Dashboard',
+          subtitle: 'Live Academic Overview & Real-Time Pulse',
           icon: LayoutDashboard,
           color: 'text-blue-600 bg-blue-50 border-blue-200/80',
         };
@@ -115,31 +113,18 @@ export const Navbar: React.FC<NavbarProps> = ({
           icon: UserIcon,
           color: 'text-indigo-600 bg-indigo-50 border-indigo-200/80',
         };
-      case 'marketplace':
-        return {
-          title: 'Campus Marketplace',
-          subtitle: 'Buy, Sell & Exchange Books, Electronics & Student Essentials',
-          icon: ShoppingBag,
-          color: 'text-emerald-600 bg-emerald-50 border-emerald-200/80',
-        };
-      case 'academic':
-        return {
-          title: 'Academic Structure',
-          subtitle: 'Departments, Degree Programs & Batch Cohort Management',
-          icon: Building2,
-          color: 'text-indigo-600 bg-indigo-50 border-indigo-200/80',
-        };
       case 'admin':
+      case 'owner-admin':
         return {
-          title: 'Owner & Admin Command Center',
-          subtitle: 'User Management, Role Delegation & Security Audit Logs',
+          title: 'Owner Admin Command Center',
+          subtitle: 'Proprietary Role Delegation & User Authority Management',
           icon: ShieldCheck,
           color: 'text-purple-600 bg-purple-50 border-purple-200/80',
         };
       default:
         return {
-          title: 'Connect PAF',
-          subtitle: 'PAF-IAST University Platform',
+          title: 'Connect Campus',
+          subtitle: 'University Multi-User Platform',
           icon: GraduationCap,
           color: 'text-blue-600 bg-blue-50 border-blue-200/80',
         };

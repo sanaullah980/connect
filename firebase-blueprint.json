@@ -129,105 +129,6 @@
       },
       "required": ["type", "title", "description", "location", "posterName", "posterUid", "status", "createdAt"]
     },
-    "MarketplaceListing": {
-      "title": "MarketplaceListing",
-      "description": "Campus marketplace goods and exchange listing",
-      "type": "object",
-      "properties": {
-        "id": { "type": "string" },
-        "title": { "type": "string", "maxLength": 150 },
-        "description": { "type": "string", "maxLength": 2000 },
-        "price": { "type": "number" },
-        "category": { "type": "string", "maxLength": 50 },
-        "condition": { "type": "string", "maxLength": 50 },
-        "listingType": { "type": "string", "enum": ["for_sale", "wanted", "free"] },
-        "campus": { "type": "string", "maxLength": 100 },
-        "sellerUid": { "type": "string" },
-        "sellerName": { "type": "string", "maxLength": 100 },
-        "sellerDepartment": { "type": "string", "maxLength": 100 },
-        "sellerProgram": { "type": "string", "maxLength": 100 },
-        "status": { "type": "string", "enum": ["active", "reserved", "sold", "expired"] },
-        "imageUrl": { "type": "string" },
-        "createdAt": { "type": "string" },
-        "updatedAt": { "type": "string" }
-      },
-      "required": ["title", "price", "category", "sellerUid", "sellerName", "status", "createdAt"]
-    },
-    "MarketplaceMessage": {
-      "title": "MarketplaceMessage",
-      "description": "Direct message on a marketplace listing",
-      "type": "object",
-      "properties": {
-        "id": { "type": "string" },
-        "listingId": { "type": "string" },
-        "senderUid": { "type": "string" },
-        "senderName": { "type": "string", "maxLength": 100 },
-        "recipientUid": { "type": "string" },
-        "text": { "type": "string", "maxLength": 1000 },
-        "createdAt": { "type": "string" }
-      },
-      "required": ["listingId", "senderUid", "recipientUid", "text", "createdAt"]
-    },
-    "AcademicDepartment": {
-      "title": "AcademicDepartment",
-      "description": "University academic department",
-      "type": "object",
-      "properties": {
-        "id": { "type": "string" },
-        "name": { "type": "string", "maxLength": 100 },
-        "code": { "type": "string", "maxLength": 30 },
-        "faculty": { "type": "string", "maxLength": 100 },
-        "createdAt": { "type": "string" }
-      },
-      "required": ["name", "code"]
-    },
-    "AcademicProgram": {
-      "title": "AcademicProgram",
-      "description": "Degree program offered by university",
-      "type": "object",
-      "properties": {
-        "id": { "type": "string" },
-        "name": { "type": "string", "maxLength": 100 },
-        "code": { "type": "string", "maxLength": 30 },
-        "departmentId": { "type": "string" },
-        "degreeType": { "type": "string", "maxLength": 30 },
-        "totalSemesters": { "type": "number" },
-        "createdAt": { "type": "string" }
-      },
-      "required": ["name", "code", "departmentId"]
-    },
-    "TimetablePdfUpload": {
-      "title": "TimetablePdfUpload",
-      "description": "Master PDF upload metadata and parsing status",
-      "type": "object",
-      "properties": {
-        "id": { "type": "string" },
-        "fileName": { "type": "string", "maxLength": 200 },
-        "term": { "type": "string", "maxLength": 50 },
-        "academicYear": { "type": "string", "maxLength": 50 },
-        "status": { "type": "string", "enum": ["uploaded", "parsed", "reviewed", "published"] },
-        "entriesCount": { "type": "number" },
-        "uploadedBy": { "type": "string" },
-        "createdAt": { "type": "string" }
-      },
-      "required": ["fileName", "term", "status", "uploadedBy", "createdAt"]
-    },
-    "AuditLog": {
-      "title": "AuditLog",
-      "description": "Administrative actions audit log",
-      "type": "object",
-      "properties": {
-        "id": { "type": "string" },
-        "actorUid": { "type": "string" },
-        "actorName": { "type": "string", "maxLength": 100 },
-        "actorEmail": { "type": "string", "maxLength": 100 },
-        "action": { "type": "string", "maxLength": 100 },
-        "target": { "type": "string", "maxLength": 100 },
-        "details": { "type": "string", "maxLength": 1000 },
-        "createdAt": { "type": "string" }
-      },
-      "required": ["actorUid", "actorName", "action", "target", "createdAt"]
-    },
     "Notification": {
       "title": "Notification",
       "description": "User notification",
@@ -277,30 +178,6 @@
     "/lost_found/{itemId}": {
       "schema": "LostFoundItem",
       "description": "Lost and found item postings"
-    },
-    "/marketplace/{listingId}": {
-      "schema": "MarketplaceListing",
-      "description": "Campus marketplace listings"
-    },
-    "/marketplace/{listingId}/messages/{messageId}": {
-      "schema": "MarketplaceMessage",
-      "description": "Messages between buyer and seller"
-    },
-    "/academic_departments/{deptId}": {
-      "schema": "AcademicDepartment",
-      "description": "Configured academic departments"
-    },
-    "/academic_programs/{programId}": {
-      "schema": "AcademicProgram",
-      "description": "Configured academic degree programs"
-    },
-    "/timetable_pdfs/{pdfId}": {
-      "schema": "TimetablePdfUpload",
-      "description": "Uploaded timetable master PDFs and versions"
-    },
-    "/audit_logs/{logId}": {
-      "schema": "AuditLog",
-      "description": "System and administrative action audit trail"
     },
     "/notifications/{notificationId}": {
       "schema": "Notification",

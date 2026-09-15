@@ -39,7 +39,7 @@ export const MaterialsView: React.FC<MaterialsViewProps> = ({
   const [title, setTitle] = useState('');
   const [subject, setSubject] = useState('');
   const [description, setDescription] = useState('');
-  const [selectedFile, setSelectedFile] = useState<{ name: string; size: string; type: string } | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
 
   useEffect(() => {
@@ -60,11 +60,7 @@ export const MaterialsView: React.FC<MaterialsViewProps> = ({
     setIsDragOver(false);
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       const file = e.dataTransfer.files[0];
-      setSelectedFile({
-        name: file.name,
-        size: formatFileSize(file.size),
-        type: file.name.split('.').pop()?.toUpperCase() || 'FILE'
-      });
+      setSelectedFile(file);
       if (!title) {
         setTitle(file.name.replace(/\.[^/.]+$/, ''));
       }
@@ -74,11 +70,7 @@ export const MaterialsView: React.FC<MaterialsViewProps> = ({
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
-      setSelectedFile({
-        name: file.name,
-        size: formatFileSize(file.size),
-        type: file.name.split('.').pop()?.toUpperCase() || 'FILE'
-      });
+      setSelectedFile(file);
       if (!title) {
         setTitle(file.name.replace(/\.[^/.]+$/, ''));
       }
@@ -101,10 +93,11 @@ export const MaterialsView: React.FC<MaterialsViewProps> = ({
         subject: subject.trim(),
         description: description.trim(),
         fileName: selectedFile.name,
-        fileSize: selectedFile.size,
-        fileType: selectedFile.type,
+        fileSize: formatFileSize(selectedFile.size),
+        fileType: selectedFile.name.split('.').pop()?.toUpperCase() || selectedFile.type || 'FILE',
         uploaderName: userProfile.name,
-        uploaderUid: userProfile.uid
+        uploaderUid: userProfile.uid,
+        file: selectedFile
       });
 
       // Reset
@@ -198,7 +191,7 @@ export const MaterialsView: React.FC<MaterialsViewProps> = ({
             className="mt-3 inline-flex items-center gap-1.5 px-4 py-2 bg-purple-50 text-purple-700 hover:bg-purple-100 rounded-xl text-xs font-bold transition-colors"
           >
             <UploadCloud className="w-3.5 h-3.5" />
-            <span>Upload notes or slides now</span>
+            <span>Upload a PDF now</span>
           </button>
         </div>
       ) : (
@@ -266,9 +259,16 @@ export const MaterialsView: React.FC<MaterialsViewProps> = ({
 
                   <div className="flex items-center gap-1.5">
                     <button
-                      onClick={() => alert(`Downloading "${mat.fileName}" (${mat.fileSize}). Cloud verified document.`)}
-                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-bold text-purple-700 bg-purple-50 hover:bg-purple-100 transition-colors"
-                      title="Download resource"
+                      onClick={() => {
+                        if (mat.downloadUrl) {
+                          window.open(mat.downloadUrl, '_blank', 'noopener,noreferrer');
+                        } else {
+                          alert('This older material does not have a cloud file attached.');
+                        }
+                      }}
+                      disabled={!mat.downloadUrl}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-bold text-purple-700 bg-purple-50 hover:bg-purple-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                      title={mat.downloadUrl ? 'Open/download resource' : 'File unavailable'}
                     >
                       <Download className="w-3.5 h-3.5" />
                       <span>Get</span>
@@ -350,7 +350,7 @@ export const MaterialsView: React.FC<MaterialsViewProps> = ({
               {/* Drag and Drop File Picker (Adheres to file upload usability guideline) */}
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Upload Document or Archive *
+                  Upload PDF *
                 </label>
                 <div
                   onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
@@ -368,6 +368,7 @@ export const MaterialsView: React.FC<MaterialsViewProps> = ({
                   <input
                     id="material-file-input"
                     type="file"
+                    accept=".pdf,application/pdf"
                     className="hidden"
                     onChange={handleFileInput}
                   />
@@ -377,14 +378,14 @@ export const MaterialsView: React.FC<MaterialsViewProps> = ({
                       <CheckCircle2 className="w-5 h-5" />
                       <div className="text-left">
                         <p className="text-xs font-bold truncate max-w-[200px]">{selectedFile.name}</p>
-                        <p className="text-[10px] text-emerald-600">{selectedFile.size} • {selectedFile.type}</p>
+                        <p className="text-[10px] text-emerald-600">{formatFileSize(selectedFile.size)} • {selectedFile.type || 'FILE'}</p>
                       </div>
                     </div>
                   ) : (
                     <div>
                       <UploadCloud className="w-8 h-8 text-purple-500 mx-auto mb-1" />
                       <p className="text-xs font-semibold text-slate-700">Drag & drop your file here</p>
-                      <p className="text-[10px] text-slate-400 mt-0.5">or click to browse from device (PDF, DOCX, PPTX, ZIP)</p>
+                      <p className="text-[10px] text-slate-400 mt-0.5">or click to browse from device (PDF only) • max 700 KB on free Firebase</p>
                     </div>
                   )}
                 </div>
@@ -403,7 +404,7 @@ export const MaterialsView: React.FC<MaterialsViewProps> = ({
                   disabled={loading}
                   className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold text-xs rounded-xl shadow-xs disabled:opacity-50"
                 >
-                  {loading ? 'Publishing...' : 'Share Material'}
+                  {loading ? 'Publishing...' : 'Publish PDF'}
                 </button>
               </div>
             </form>

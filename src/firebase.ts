@@ -1,11 +1,17 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider, setPersistence, browserLocalPersistence } from 'firebase/auth';
 import { getFirestore, doc, getDocFromServer } from 'firebase/firestore';
 import firebaseConfig from '../firebase-applet-config.json';
 
 export const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 export const auth = getAuth(app);
+// Keep the Firebase session across refreshes/browser restarts.
+// Firebase web defaults to local persistence, but setting it explicitly avoids
+// environments where the persistence default is changed or unavailable.
+setPersistence(auth, browserLocalPersistence).catch((error) => {
+  console.warn('Could not enable local authentication persistence:', error);
+});
 export const googleProvider = new GoogleAuthProvider();
 
 export const PERMANENT_OWNER_EMAIL = 'sanaullahmawia980@gmail.com';
@@ -62,7 +68,7 @@ export async function testConnection() {
     await getDocFromServer(doc(db, 'test', 'connection'));
   } catch (error) {
     if (error instanceof Error && error.message.includes('the client is offline')) {
-      console.warn("Please check your Firebase configuration: client is offline.");
+      console.warn('Please check your Firebase configuration: client is offline.');
     }
   }
 }
