@@ -14,7 +14,9 @@ import {
   X,
   GraduationCap,
   ChevronRight,
-  School
+  School,
+  ShoppingBag,
+  Building2
 } from 'lucide-react';
 import { NavigationPage } from '../types';
 import { useAuth } from '../context/AuthContext';
@@ -37,7 +39,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   unreadNotificationsCount,
   unreadCount,
 }) => {
-  const { currentUser, userProfile, isOwner, logout } = useAuth();
+  const { currentUser, userProfile, isOwner, canManageUsers, logout } = useAuth();
   const effectiveUnread = unreadNotificationsCount ?? unreadCount ?? 0;
 
   const handleNav = (page: NavigationPage) => {
@@ -94,7 +96,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     },
     {
       id: 'groups',
-      label: 'Subject Groups & Chat',
+      label: 'Subject Groups',
       icon: MessageSquare,
       page: 'groups' as NavigationPage,
       gradient: 'from-sky-500 to-blue-600',
@@ -103,6 +105,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
       inactiveIconColor: 'text-sky-600 bg-sky-50/80 group-hover:bg-sky-100',
       badgeText: 'Chat',
       badgeClass: 'bg-sky-100 text-sky-700',
+    },
+    {
+      id: 'marketplace',
+      label: 'Marketplace',
+      icon: ShoppingBag,
+      page: 'marketplace' as NavigationPage,
+      gradient: 'from-emerald-600 to-teal-600',
+      activeBg: 'bg-emerald-50 text-emerald-900 border-emerald-200/80',
+      activeIconBg: 'bg-gradient-to-tr from-emerald-600 to-teal-600 text-white',
+      inactiveIconColor: 'text-emerald-600 bg-emerald-50/80 group-hover:bg-emerald-100',
+      badgeText: 'Buy/Sell',
+      badgeClass: 'bg-emerald-100 text-emerald-800',
     },
     {
       id: 'lostfound',
@@ -115,6 +129,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
       inactiveIconColor: 'text-orange-600 bg-orange-50/80 group-hover:bg-orange-100',
       badgeText: null,
     },
+    ...((isOwner || canManageUsers) ? [{
+      id: 'academic',
+      label: 'Academic Structure',
+      icon: Building2,
+      page: 'academic' as NavigationPage,
+      gradient: 'from-indigo-600 to-blue-700',
+      activeBg: 'bg-indigo-50 text-indigo-900 border-indigo-200/80',
+      activeIconBg: 'bg-gradient-to-tr from-indigo-600 to-blue-700 text-white',
+      inactiveIconColor: 'text-indigo-600 bg-indigo-50/80 group-hover:bg-indigo-100',
+      badgeText: 'Admin',
+      badgeClass: 'bg-indigo-100 text-indigo-800',
+    }] : []),
     {
       id: 'profile',
       label: 'Academic Profile',
@@ -131,20 +157,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const sidebarContent = (
     <div className="flex flex-col h-full bg-white/95 backdrop-blur-md border-r border-slate-200/90 shadow-sm">
       {/* Brand Header */}
-      <div className="p-4 border-b border-slate-100/90 flex items-center justify-between bg-gradient-to-r from-blue-50/50 via-indigo-50/40 to-purple-50/30">
+      <div className="p-4 border-b border-slate-100/90 flex items-center justify-between bg-[#0A2540] text-white">
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-violet-600 flex items-center justify-center text-white font-bold shadow-md shadow-indigo-500/25 ring-2 ring-indigo-100">
+          <div className="w-11 h-11 rounded-2xl bg-white/10 flex items-center justify-center text-white font-bold border border-white/20">
             <GraduationCap className="w-6 h-6 text-white" />
           </div>
           <div>
             <div className="flex items-center gap-1.5">
-              <span className="font-black text-lg tracking-tight bg-gradient-to-r from-blue-700 via-indigo-700 to-purple-700 bg-clip-text text-transparent">
-                Connect Campus
+              <span className="font-black text-lg tracking-tight text-white">
+                Connect PAF
               </span>
             </div>
-            <p className="text-[11px] font-medium text-slate-400 flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-              University Portal
+            <p className="text-[11px] font-medium text-slate-300 flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+              PAF-IAST University
             </p>
           </div>
         </div>

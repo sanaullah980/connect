@@ -1,8 +1,6 @@
 {
-  "name": "Connect Campus",
-  "description": "A real-time, multi-user university platform connecting students, teachers, CRs, staff, admins, and the permanent owner in one shared campus ecosystem.",
+  "name": "Connect PAF",
+  "description": "Professional university campus platform for PAF-IAST connecting students, faculty, departments, and administration with personalized academic feeds, single-PDF timetable automation, and campus marketplace.",
   "requestFramePermissions": [],
-  "majorCapabilities": [
-    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
-  ]
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

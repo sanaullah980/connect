@@ -1,6 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Notice } from '../types';
-import { subscribeNotices, createNotice, deleteNotice, createNotification } from '../services/campusService';
+import { Notice, AcademicDepartment, AcademicProgram } from '../types';
+import { 
+  subscribeNotices, 
+  createNotice, 
+  deleteNotice, 
+  createNotification,
+  subscribeDepartments,
+  subscribePrograms
+} from '../services/campusService';
 import { useAuth } from '../context/AuthContext';
 import { RoleBadge } from '../components/RoleBadge';
 import { 
@@ -13,7 +20,8 @@ import {
   User, 
   Filter,
   Megaphone,
-  X
+  X,
+  Target
 } from 'lucide-react';
 
 interface NoticesViewProps {
@@ -29,6 +37,8 @@ export const NoticesView: React.FC<NoticesViewProps> = ({
 }) => {
   const { userProfile, isOwner, canPublishNotices } = useAuth();
   const [notices, setNotices] = useState<Notice[]>([]);
+  const [departments, setDepartments] = useState<AcademicDepartment[]>([]);
+  const [programs, setPrograms] = useState<AcademicProgram[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [loading, setLoading] = useState(false);
@@ -36,15 +46,26 @@ export const NoticesView: React.FC<NoticesViewProps> = ({
   // Form states
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [category, setCategory] = useState('Academic');
+  const [category, setCategory] = useState<any>('Academic');
   const [priority, setPriority] = useState<'High' | 'Medium' | 'Normal'>('Normal');
+  const [audienceScope, setAudienceScope] = useState<'all' | 'department' | 'program' | 'section'>('all');
+  const [targetDepartment, setTargetDepartment] = useState('');
+  const [targetProgram, setTargetProgram] = useState('');
+  const [targetSemester, setTargetSemester] = useState('Semester 1');
+  const [targetSection, setTargetSection] = useState('Section A');
   const [formError, setFormError] = useState<string | null>(null);
 
   const categories = ['All', 'Academic', 'Exam', 'Campus Life', 'Sports', 'Urgent', 'General'];
 
   useEffect(() => {
     const unsubscribe = subscribeNotices(setNotices);
-    return () => unsubscribe();
+    const unsubDepts = subscribeDepartments(setDepartments);
+    const unsubProgs = subscribePrograms(setPrograms);
+    return () => {
+      unsubscribe();
+      unsubDepts();
+      unsubProgs();
+    };
   }, []);
 
   const handleCreateNotice = async (e: React.FormEvent) => {
@@ -64,6 +85,11 @@ export const NoticesView: React.FC<NoticesViewProps> = ({
         description: description.trim(),
         category,
         priority,
+        audienceScope,
+        targetDepartment: audienceScope !== 'all' ? (targetDepartment || undefined) : undefined,
+        targetProgram: ['program', 'section'].includes(audienceScope) ? (targetProgram || undefined) : undefined,
+        targetSemester: audienceScope === 'section' ? targetSemester : undefined,
+        targetSection: audienceScope === 'section' ? targetSection : undefined,
         authorName: userProfile.name,
         authorUid: userProfile.uid,
         authorRole: primaryRole
@@ -74,6 +100,9 @@ export const NoticesView: React.FC<NoticesViewProps> = ({
       setDescription('');
       setCategory('Academic');
       setPriority('Normal');
+      setAudienceScope('all');
+      setTargetDepartment('');
+      setTargetProgram('');
       onClosePublishModal();
     } catch (err: any) {
       setFormError(err.message || 'Failed to publish notice');
@@ -337,6 +366,100 @@ export const NoticesView: React.FC<NoticesViewProps> = ({
                     <option value="High">High (Urgent Alert)</option>
                   </select>
                 </div>
+              </div>
+
+              {/* Target Audience Selector */}
+              <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                    <Target className="w-3.5 h-3.5 text-indigo-600" />
+                    Target Audience Scope
+                  </label>
+                  <span className="text-[10px] text-slate-500 font-medium">Who sees this announcement</span>
+                </div>
+                <div className="grid grid-cols-4 gap-1.5 text-xs">
+                  {[
+                    { id: 'all', label: 'University-Wide' },
+                    { id: 'department', label: 'Department' },
+                    { id: 'program', label: 'Program' },
+                    { id: 'section', label: 'Section' },
+                  ].map((sc) => (
+                    <button
+                      key={sc.id}
+                      type="button"
+                      onClick={() => setAudienceScope(sc.id as any)}
+                      className={`py-1.5 px-2 rounded-lg font-semibold text-center border transition-all ${
+                        audienceScope === sc.id
+                          ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs'
+                          : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
+                      }`}
+                    >
+                      {sc.label}
+                    </button>
+                  ))}
+                </div>
+
+                {audienceScope === 'department' && (
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-600 mb-1">Select Department</label>
+                    <select
+                      value={targetDepartment}
+                      onChange={(e) => setTargetDepartment(e.target.value)}
+                      className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs"
+                    >
+                      <option value="">Choose Department</option>
+                      {departments.map((d) => (
+                        <option key={d.id} value={d.name}>{d.name} ({d.code})</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                {(audienceScope === 'program' || audienceScope === 'section') && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <div>
+                      <label className="block text-[11px] font-semibold text-slate-600 mb-1">Degree Program</label>
+                      <select
+                        value={targetProgram}
+                        onChange={(e) => setTargetProgram(e.target.value)}
+                        className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs"
+                      >
+                        <option value="">Choose Program</option>
+                        {programs.map((p) => (
+                          <option key={p.id} value={p.name}>{p.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                    {audienceScope === 'section' && (
+                      <div className="grid grid-cols-2 gap-1.5">
+                        <div>
+                          <label className="block text-[11px] font-semibold text-slate-600 mb-1">Semester</label>
+                          <select
+                            value={targetSemester}
+                            onChange={(e) => setTargetSemester(e.target.value)}
+                            className="w-full px-2 py-1.5 bg-white border border-slate-200 rounded-lg text-xs"
+                          >
+                            {[1, 2, 3, 4, 5, 6, 7, 8].map(s => (
+                              <option key={s} value={`Semester ${s}`}>Sem {s}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-[11px] font-semibold text-slate-600 mb-1">Section</label>
+                          <select
+                            value={targetSection}
+                            onChange={(e) => setTargetSection(e.target.value)}
+                            className="w-full px-2 py-1.5 bg-white border border-slate-200 rounded-lg text-xs"
+                          >
+                            {['Section A', 'Section B', 'Section C', 'Section D'].map(sec => (
+                              <option key={sec} value={sec}>{sec.replace('Section ', 'Sec ')}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               <div>

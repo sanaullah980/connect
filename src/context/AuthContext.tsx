@@ -36,6 +36,7 @@ interface AuthContextType {
   canPublishNotices: boolean;
   canManageTimetable: boolean;
   canModerate: boolean;
+  canManageUsers: boolean;
   loginWithGoogle: () => Promise<void>;
   loginWithUsername: (username: string, password: string) => Promise<void>;
   registerUser: (data: {
@@ -138,6 +139,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const canPublishNotices = isOwner || hasRole('Institution Admin') || hasRole('Announcement Publisher') || hasRole('Teacher') || hasRole('CR');
   const canManageTimetable = isOwner || hasRole('Institution Admin') || hasRole('Timetable Manager');
   const canModerate = isOwner || hasRole('Institution Admin') || hasRole('Moderator');
+  const canManageUsers = isOwner || hasRole('Institution Admin');
 
   const loginWithGoogle = async () => {
     try {
@@ -283,6 +285,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         canPublishNotices,
         canManageTimetable,
         canModerate,
+        canManageUsers,
         loginWithGoogle,
         loginWithUsername,
         registerUser,
