@@ -16,7 +16,9 @@ import {
   Search,
   User as UserIcon,
   ShieldCheck,
-  Clock
+  Clock,
+  ShoppingBag,
+  Building2
 } from 'lucide-react';
 import { NavigationPage } from '../types';
 import { useAuth } from '../context/AuthContext';
@@ -59,8 +61,8 @@ export const Navbar: React.FC<NavbarProps> = ({
     switch (page) {
       case 'dashboard':
         return {
-          title: 'Campus Dashboard',
-          subtitle: 'Live Academic Overview & Real-Time Pulse',
+          title: 'Connect PAF',
+          subtitle: 'PAF-IAST Campus • Live Academic Overview',
           icon: LayoutDashboard,
           color: 'text-blue-600 bg-blue-50 border-blue-200/80',
         };
@@ -113,18 +115,31 @@ export const Navbar: React.FC<NavbarProps> = ({
           icon: UserIcon,
           color: 'text-indigo-600 bg-indigo-50 border-indigo-200/80',
         };
-      case 'admin':
-      case 'owner-admin':
+      case 'marketplace':
         return {
-          title: 'Owner Admin Command Center',
-          subtitle: 'Proprietary Role Delegation & User Authority Management',
+          title: 'Campus Marketplace',
+          subtitle: 'Buy, Sell & Exchange Books, Electronics & Student Essentials',
+          icon: ShoppingBag,
+          color: 'text-emerald-600 bg-emerald-50 border-emerald-200/80',
+        };
+      case 'academic':
+        return {
+          title: 'Academic Structure',
+          subtitle: 'Departments, Degree Programs & Batch Cohort Management',
+          icon: Building2,
+          color: 'text-indigo-600 bg-indigo-50 border-indigo-200/80',
+        };
+      case 'admin':
+        return {
+          title: 'Owner & Admin Command Center',
+          subtitle: 'User Management, Role Delegation & Security Audit Logs',
           icon: ShieldCheck,
           color: 'text-purple-600 bg-purple-50 border-purple-200/80',
         };
       default:
         return {
-          title: 'Connect Campus',
-          subtitle: 'University Multi-User Platform',
+          title: 'Connect PAF',
+          subtitle: 'PAF-IAST University Platform',
           icon: GraduationCap,
           color: 'text-blue-600 bg-blue-50 border-blue-200/80',
         };
