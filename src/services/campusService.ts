@@ -21,7 +21,9 @@ import {
   GroupMessage, 
   LostFoundItem, 
   NotificationItem, 
-  UserProfile 
+  UserProfile,
+  MarketplaceListing,
+  MarketplaceMessage
 } from '../types';
 
 // ========================
@@ -298,6 +300,124 @@ export async function deleteLostFound(itemId: string) {
     await deleteDoc(doc(db, 'lost_found', itemId));
   } catch (error) {
     handleFirestoreError(error, OperationType.DELETE, `lost_found/${itemId}`);
+    throw error;
+  }
+}
+
+// ========================
+// MARKETPLACE
+// ========================
+export function subscribeMarketplace(callback: (listings: MarketplaceListing[]) => void) {
+  const colRef = collection(db, 'marketplace');
+  return onSnapshot(colRef, (snapshot) => {
+    const list: MarketplaceListing[] = snapshot.docs.map(docSnap => ({
+      id: docSnap.id,
+      ...docSnap.data()
+    } as MarketplaceListing));
+    list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    callback(list);
+  }, (error) => {
+    handleFirestoreError(error, OperationType.GET, 'marketplace');
+  });
+}
+
+export async function createMarketplaceListing(data: Omit<MarketplaceListing, 'id' | 'createdAt' | 'updatedAt'>) {
+  try {
+    const docRef = await addDoc(collection(db, 'marketplace'), {
+      ...data,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    });
+    return docRef.id;
+  } catch (error) {
+    handleFirestoreError(error, OperationType.CREATE, 'marketplace');
+    throw error;
+  }
+}
+
+export async function updateMarketplaceListing(id: string, updates: Partial<MarketplaceListing>) {
+  try {
+    await updateDoc(doc(db, 'marketplace', id), {
+      ...updates,
+      updatedAt: new Date().toISOString()
+    });
+  } catch (error) {
+    handleFirestoreError(error, OperationType.UPDATE, `marketplace/${id}`);
+    throw error;
+  }
+}
+
+export async function deleteMarketplaceListing(id: string) {
+  try {
+    await deleteDoc(doc(db, 'marketplace', id));
+  } catch (error) {
+    handleFirestoreError(error, OperationType.DELETE, `marketplace/${id}`);
+    throw error;
+  }
+}
+
+export function subscribeMarketplaceMessages(
+  listingId: string,
+  userUid: string | undefined,
+  callback: (messages: MarketplaceMessage[]) => void
+) {
+  const colRef = collection(db, 'marketplace_messages');
+  const q = query(
+    colRef,
+    where('listingId', '==', listingId),
+    orderBy('createdAt', 'asc')
+  );
+  return onSnapshot(q, (snapshot) => {
+    const list: MarketplaceMessage[] = snapshot.docs.map(docSnap => ({
+      id: docSnap.id,
+      ...docSnap.data()
+    } as MarketplaceMessage));
+    callback(list);
+  }, (error) => {
+    handleFirestoreError(error, OperationType.GET, `marketplace_messages/${listingId}`);
+  });
+}
+
+export async function sendMarketplaceMessage(
+  listingId: string,
+  listingTitle: string,
+  receiverUid: string,
+  text: string,
+  sender: UserProfile
+) {
+  try {
+    await addDoc(collection(db, 'marketplace_messages'), {
+      listingId,
+      listingTitle,
+      senderUid: sender.uid,
+      senderName: sender.name,
+      receiverUid,
+      text: text.trim(),
+      createdAt: new Date().toISOString()
+    });
+  } catch (error) {
+    handleFirestoreError(error, OperationType.CREATE, 'marketplace_messages');
+    throw error;
+  }
+}
+
+export async function reportMarketplaceListing(
+  listingId: string,
+  listingTitle: string,
+  reason: string,
+  reporter: UserProfile
+) {
+  try {
+    await addDoc(collection(db, 'marketplace_reports'), {
+      listingId,
+      listingTitle,
+      reason: reason.trim(),
+      reporterUid: reporter.uid,
+      reporterName: reporter.name,
+      createdAt: new Date().toISOString()
+    });
+  } catch (error) {
+    handleFirestoreError(error, OperationType.CREATE, 'marketplace_reports');
     throw error;
   }
 }

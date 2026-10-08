@@ -129,6 +129,46 @@
       },
       "required": ["type", "title", "description", "location", "posterName", "posterUid", "status", "createdAt"]
     },
+    "MarketplaceListing": {
+      "title": "MarketplaceListing",
+      "description": "Student marketplace item for buying/selling/trading",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string", "maxLength": 150 },
+        "description": { "type": "string", "maxLength": 2000 },
+        "price": { "type": "number" },
+        "category": { "type": "string", "enum": ["Books", "Electronics", "Calculators", "Stationery", "Furniture", "Hostel items", "Bikes", "Clothing", "Other"] },
+        "condition": { "type": "string", "enum": ["Brand New", "Like New", "Good", "Fair"] },
+        "listingType": { "type": "string", "enum": ["for_sale", "wanted", "free"] },
+        "campus": { "type": "string", "maxLength": 100 },
+        "imageUrl": { "type": "string", "maxLength": 1000 },
+        "sellerUid": { "type": "string" },
+        "sellerName": { "type": "string", "maxLength": 100 },
+        "sellerDepartment": { "type": "string", "maxLength": 100 },
+        "sellerProgram": { "type": "string", "maxLength": 100 },
+        "status": { "type": "string", "enum": ["active", "reserved", "sold"] },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["title", "description", "price", "category", "condition", "listingType", "campus", "imageUrl", "sellerUid", "sellerName", "sellerDepartment", "sellerProgram", "status", "createdAt"]
+    },
+    "MarketplaceMessage": {
+      "title": "MarketplaceMessage",
+      "description": "Direct message about a marketplace listing",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "listingId": { "type": "string" },
+        "listingTitle": { "type": "string", "maxLength": 150 },
+        "senderUid": { "type": "string" },
+        "senderName": { "type": "string", "maxLength": 100 },
+        "receiverUid": { "type": "string" },
+        "text": { "type": "string", "maxLength": 2000 },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["listingId", "listingTitle", "senderUid", "senderName", "receiverUid", "text", "createdAt"]
+    },
     "Notification": {
       "title": "Notification",
       "description": "User notification",
@@ -178,6 +218,14 @@
     "/lost_found/{itemId}": {
       "schema": "LostFoundItem",
       "description": "Lost and found item postings"
+    },
+    "/marketplace/{listingId}": {
+      "schema": "MarketplaceListing",
+      "description": "Student marketplace item listings"
+    },
+    "/marketplace_messages/{messageId}": {
+      "schema": "MarketplaceMessage",
+      "description": "Direct messages about marketplace listings"
     },
     "/notifications/{notificationId}": {
       "schema": "Notification",

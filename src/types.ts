@@ -110,12 +110,42 @@ export interface LostFoundItem {
   createdAt: string;
 }
 
+export interface MarketplaceListing {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  category: 'Books' | 'Electronics' | 'Calculators' | 'Stationery' | 'Furniture' | 'Hostel items' | 'Bikes' | 'Clothing' | 'Other';
+  condition: 'Brand New' | 'Like New' | 'Good' | 'Fair';
+  listingType: 'for_sale' | 'wanted' | 'free';
+  campus: string;
+  imageUrl: string;
+  sellerUid: string;
+  sellerName: string;
+  sellerDepartment: string;
+  sellerProgram: string;
+  status: 'active' | 'reserved' | 'sold';
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface MarketplaceMessage {
+  id: string;
+  listingId: string;
+  listingTitle: string;
+  senderUid: string;
+  senderName: string;
+  receiverUid: string;
+  text: string;
+  createdAt: string;
+}
+
 export interface NotificationItem {
   id: string;
   recipientUid: string;
   title: string;
   message: string;
-  type: 'notice' | 'message' | 'academic' | 'role' | 'system';
+  type: 'notice' | 'message' | 'academic' | 'role' | 'system' | 'marketplace';
   link?: string;
   isRead: boolean;
   createdAt: string;
@@ -128,6 +158,7 @@ export type NavigationPage =
   | 'materials'
   | 'groups'
   | 'lostfound'
+  | 'marketplace'
   | 'notifications'
   | 'profile'
   | 'owner-admin'
