@@ -23,6 +23,26 @@ export const ALL_ASSIGNABLE_ROLES: CampusRole[] = [
   'Institution Admin'
 ];
 
+export interface AcademicDepartment {
+  id: string;
+  name: string;
+  code: string;
+  headOfDepartment?: string;
+  description?: string;
+  isActive?: boolean;
+}
+
+export interface AcademicProgram {
+  id: string;
+  name: string;
+  code: string;
+  departmentId: string;
+  departmentName: string;
+  durationYears?: string;
+  degreeLevel?: 'Undergraduate' | 'Graduate' | 'Postgraduate';
+  isActive?: boolean;
+}
+
 export interface UserProfile {
   uid: string;
   name: string;
@@ -31,8 +51,11 @@ export interface UserProfile {
   loginProvider: 'google' | 'password';
   roles: string[];
   department?: string;
+  departmentId?: string;
   program?: string;
+  programId?: string;
   semester?: string;
+  section?: string;
   studentId?: string;
   bio?: string;
   createdAt: string;
@@ -53,11 +76,22 @@ export interface Notice {
 export interface TimetableClass {
   id: string;
   subject: string;
+  subjectCode?: string;
   day: 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday' | 'Sunday';
   startTime: string;
   endTime: string;
   instructor: string;
   room: string;
+  department?: string;
+  departmentId?: string;
+  programName?: string;
+  programId?: string;
+  batch?: string;
+  semester?: string;
+  section?: string;
+  academicTerm?: string;
+  needsReview?: boolean;
+  reviewNote?: string;
   updatedBy?: string;
   updatedAt?: string;
 }
